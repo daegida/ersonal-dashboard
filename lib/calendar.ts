@@ -68,6 +68,12 @@ type CalendarSource = {
   name: string;
 };
 
+function isWithinToday(value: string | null | undefined, start: string, end: string) {
+  if (!value) return false;
+  const time = new Date(value).getTime();
+  return time >= new Date(start).getTime() && time <= new Date(end).getTime();
+}
+
 async function fetchSelectedCalendarSources(token: string): Promise<CalendarSource[]> {
   const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
     headers: {
@@ -184,11 +190,87 @@ export async function getTodayCalendar(): Promise<CalendarResponse> {
       .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
       .slice(0, 20);
 
+    let tasksNote: string | undefined;
+
+    try {
+      const taskListResponse = await fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", {
+        headers: {
+          authorization: `Bearer ${token}`
+        },
+        cache: "no-store"
+      });
+
+      if (taskListResponse.ok) {
+        const taskListsJson = await taskListResponse.json();
+        const taskLists = Array.isArray(taskListsJson.items) ? taskListsJson.items : [];
+
+        const taskResponses = await Promise.all(
+          taskLists.map(async (taskList: Record<string, unknown>) => {
+            const taskListId = String(taskList.id ?? "");
+            const taskListTitle = String(taskList.title ?? "Tasks");
+
+            if (!taskListId) return [];
+
+            const url = new URL(`https://tasks.googleapis.com/tasks/v1/lists/${encodeURIComponent(taskListId)}/tasks`);
+            url.searchParams.set("showCompleted", "false");
+            url.searchParams.set("showDeleted", "false");
+            url.searchParams.set("showHidden", "false");
+            url.searchParams.set("dueMin", start);
+            url.searchParams.set("dueMax", end);
+            url.searchParams.set("maxResults", "50");
+
+            const response = await fetch(url, {
+              headers: {
+                authorization: `Bearer ${token}`
+              },
+              cache: "no-store"
+            });
+
+            if (!response.ok) {
+              return [];
+            }
+
+            const json = await response.json();
+            const items = Array.isArray(json.items) ? json.items : [];
+
+            return items
+              .filter((item: Record<string, unknown>) => {
+                const status = String(item.status ?? "");
+                const due = typeof item.due === "string" ? item.due : null;
+                return status !== "completed" && isWithinToday(due, start, end);
+              })
+              .map((item: Record<string, unknown>) => {
+                const due = typeof item.due === "string" ? item.due : start;
+
+                return {
+                  id: `task:${taskListId}:${String(item.id ?? "")}`,
+                  title: String(item.title ?? "할 일"),
+                  start: due,
+                  end: due,
+                  isAllDay: true,
+                  calendarId: taskListId,
+                  calendarName: taskListTitle,
+                  isTask: true
+                };
+              });
+          })
+        );
+
+        events.push(...taskResponses.flat());
+        events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+      } else if (taskListResponse.status === 403 || taskListResponse.status === 401) {
+        tasksNote = "Google Tasks 권한이 없어 일정형 할 일은 아직 표시되지 않습니다.";
+      }
+    } catch {
+      tasksNote = "Google Tasks를 불러오지 못해 캘린더 일정만 표시 중입니다.";
+    }
+
     return {
       source: "google-calendar",
       generatedAt: new Date().toISOString(),
       date,
-      events
+      events,
+      note: tasksNote
     };
   } catch (error) {
     if (error instanceof Error && error.message.startsWith("403:")) {
