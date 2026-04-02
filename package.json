@@ -1,0 +1,26 @@
+{
+  "name": "personal-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "calendar:cache": "node scripts/update-calendar-cache.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "next": "^15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.5",
+    "typescript": "^5.8.3"
+  }
+}

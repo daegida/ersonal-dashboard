@@ -1,0 +1,671 @@
+:root {
+  --bg: #f4f6f1;
+  --panel: rgba(255, 255, 255, 0.92);
+  --panel-strong: rgba(255, 255, 255, 0.98);
+  --line: rgba(37, 54, 40, 0.08);
+  --text: #172018;
+  --muted: #6b786d;
+  --brand: #2f6b4f;
+  --accent: #eea443;
+  --danger: #c45959;
+  --shadow: 0 18px 50px rgba(34, 48, 31, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "Pretendard Variable", "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(226, 238, 218, 0.95), transparent 30%),
+    radial-gradient(circle at top right, rgba(220, 231, 244, 0.8), transparent 30%),
+    linear-gradient(180deg, #fafcf8 0%, var(--bg) 100%);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  width: min(1280px, calc(100% - 20px));
+  margin: 0 auto;
+}
+
+.focusShell {
+  padding: 16px 0 28px;
+}
+
+.focusHeader,
+.summaryCardMain,
+.scheduleBoard,
+.manageBlock,
+.noticeBanner {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.focusHeader {
+  border-radius: 28px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.focusEyebrow {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.focusTitle {
+  margin: 8px 0 0;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+}
+
+.focusDate {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.focusGrid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.summaryCardMain {
+  border-radius: 28px;
+  padding: 11px 12px;
+  display: grid;
+  gap: 5px;
+  min-height: 188px;
+}
+
+.weatherSummary {
+  background:
+    linear-gradient(135deg, rgba(233, 244, 235, 0.96), rgba(230, 236, 251, 0.96));
+}
+
+.summaryHeroRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.summaryLead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.summaryHeading {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.summaryLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.summaryIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--panel-strong);
+  font-size: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.summaryLabel {
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.summaryTopMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.summaryTopMeta::-webkit-scrollbar {
+  display: none;
+}
+
+.summaryValue {
+  font-size: clamp(1.45rem, 2.1vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(37, 54, 40, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.summarySub {
+  color: var(--muted);
+  font-size: 0.76rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.summaryPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(37, 54, 40, 0.08);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.summaryFooter {
+  margin-top: auto;
+}
+
+.cardChartBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.cardChartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.cardChartHeader strong {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.weatherNowLabel,
+.weeklyClimateSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.weatherInlineIcon {
+  font-size: 1rem;
+}
+
+.simpleRow {
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.miniChartWrap {
+  height: 120px;
+  border-radius: 18px;
+  padding: 6px 4px 2px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.largeWeeklyChart {
+  height: 220px;
+  margin-top: 10px;
+}
+
+.noticeBanner {
+  margin-top: 12px;
+  border-radius: 20px;
+  padding: 12px 14px;
+  color: var(--brand);
+}
+
+.scheduleBoard {
+  margin-top: 10px;
+  border-radius: 24px;
+  padding: 10px 12px;
+}
+
+.scheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.scheduleTitle {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.scheduleCountBadge {
+  min-width: 54px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(37, 54, 40, 0.08);
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.scheduleList {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.scheduleItem,
+.scheduleEmpty {
+  border-radius: 18px;
+  padding: 9px 10px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+}
+
+.scheduleTime {
+  color: var(--brand);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.scheduleNote {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.manageBlock {
+  margin-top: 14px;
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.manageBlock summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.manageBlock summary::-webkit-details-marker {
+  display: none;
+}
+
+.manageGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.managePanel {
+  border-radius: 20px;
+  padding: 14px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.managePanel h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.compactInputs {
+  display: grid;
+  gap: 8px;
+}
+
+.compactInputs.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compactInputs.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.compactInputs input {
+  width: 100%;
+  min-width: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(37, 54, 40, 0.12);
+  padding: 11px 12px;
+  background: white;
+}
+
+.button,
+.textButton,
+.secondaryButton {
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button {
+  margin-top: 10px;
+  border-radius: 14px;
+  background: var(--brand);
+  color: white;
+  padding: 11px 14px;
+}
+
+.textButton {
+  background: transparent;
+  color: var(--danger);
+}
+
+.secondaryButton {
+  border-radius: 12px;
+  background: #edf4ef;
+  color: var(--brand);
+  padding: 10px 12px;
+}
+
+.simpleList {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.integrationRow {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.weeklySummaryText {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.weatherChart,
+.financeChart,
+.weightChart,
+.runningChart {
+  height: 148px;
+}
+
+.weeklyClimateRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.weeklyClimateItem {
+  border-radius: 16px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.weeklyClimateItem {
+  padding: 8px 6px;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.weeklyClimateItem span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.weeklyClimateItem strong {
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.weeklyClimateTemp {
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.integrationActions {
+  display: flex;
+  gap: 8px;
+}
+
+.simpleRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.gridWeight,
+.gridRun {
+  grid-template-columns: 1fr auto auto;
+}
+
+.simpleRow small {
+  color: var(--muted);
+}
+
+.changeUp {
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.changeDown {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .focusGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scheduleList,
+  .manageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(100% - 12px, 1280px);
+  }
+
+  .focusShell {
+    padding-top: 10px;
+  }
+
+  .focusHeader,
+  .summaryCardMain,
+  .scheduleBoard,
+  .manageBlock {
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .focusHeader,
+  .miniForecast,
+  .compactInputs.three,
+  .compactInputs.four {
+    grid-template-columns: 1fr;
+  }
+
+  .focusHeader {
+    align-items: flex-start;
+  }
+
+  .focusGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .summaryCardMain {
+    min-height: 118px;
+    padding: 9px;
+    gap: 6px;
+  }
+
+  .simpleRow,
+  .gridWeight,
+  .gridRun {
+    grid-template-columns: 1fr;
+  }
+
+  .integrationRow,
+  .integrationActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .focusTitle {
+    font-size: 1.9rem;
+  }
+
+  .focusDate,
+  .focusEyebrow {
+    font-size: 0.78rem;
+  }
+
+  .scheduleHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summaryLabel {
+    font-size: 0.78rem;
+  }
+
+  .summaryValue {
+    font-size: 1.24rem;
+    min-height: 38px;
+    padding: 8px 11px;
+    border-radius: 14px;
+  }
+
+  .summarySub {
+    font-size: 0.68rem;
+    line-height: 1.1;
+    gap: 4px;
+  }
+
+  .summaryPill {
+    min-height: 22px;
+    padding: 3px 7px;
+  }
+
+  .summaryFooter {
+    display: none;
+  }
+
+  .summaryCardMain .summaryFooter {
+    display: block;
+  }
+
+  .summaryCardMain .miniChartWrap {
+    height: 92px;
+  }
+
+  .weatherChart,
+  .financeChart,
+  .weightChart,
+  .runningChart {
+    height: 92px;
+  }
+
+  .weeklyClimateRow {
+    grid-template-columns: repeat(7, minmax(54px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .weeklyClimateRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .weeklyClimateItem {
+    min-width: 54px;
+  }
+
+  .cardChartHeader {
+    font-size: 0.74rem;
+  }
+
+  .cardChartHeader strong {
+    font-size: 0.82rem;
+  }
+
+  .scheduleBoard {
+    padding: 10px 12px;
+  }
+
+  .scheduleTitle {
+    font-size: 0.92rem;
+  }
+
+  .scheduleItem,
+  .scheduleEmpty {
+    padding: 8px 9px;
+    border-radius: 14px;
+  }
+
+  .scheduleItem strong,
+  .scheduleEmpty {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .manageBlock {
+    margin-top: 10px;
+  }
+}
