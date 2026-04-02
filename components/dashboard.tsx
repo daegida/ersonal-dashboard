@@ -353,24 +353,57 @@ function WeightManager({
   onSave: (payload: { date: string; targetWeight: number | null; actualWeight: number | null }) => void;
 }) {
   const [form, setForm] = useState({ date: defaultDate, targetWeight: "", actualWeight: "" });
+  const [isTargetAuto, setIsTargetAuto] = useState(true);
+  const autoTargetWeight = useMemo(() => getAutoTargetWeight(weights, form.date), [weights, form.date]);
+
+  useEffect(() => {
+    if (isTargetAuto) {
+      setForm((current) => ({
+        ...current,
+        targetWeight: autoTargetWeight === null ? "" : autoTargetWeight.toFixed(1)
+      }));
+    }
+  }, [autoTargetWeight, isTargetAuto]);
 
   return (
     <>
       <div className="compactInputs three">
-        <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-        <input value={form.targetWeight} onChange={(e) => setForm({ ...form, targetWeight: e.target.value })} placeholder="계획" />
+        <input
+          type="date"
+          value={form.date}
+          onChange={(e) => {
+            setIsTargetAuto(true);
+            setForm({ ...form, date: e.target.value });
+          }}
+        />
+        <input
+          value={form.targetWeight}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+            setIsTargetAuto(nextValue === "");
+            setForm({ ...form, targetWeight: nextValue });
+          }}
+          placeholder="계획"
+        />
         <input value={form.actualWeight} onChange={(e) => setForm({ ...form, actualWeight: e.target.value })} placeholder="실적" />
       </div>
       <button
         className="button"
         disabled={pending}
-        onClick={() =>
+        onClick={() => {
+          const resolvedTargetWeight =
+            form.targetWeight === ""
+              ? autoTargetWeight
+              : Number.isFinite(Number(form.targetWeight))
+                ? Number(form.targetWeight)
+                : null;
+
           onSave({
             date: form.date,
-            targetWeight: form.targetWeight === "" ? null : Number(form.targetWeight),
+            targetWeight: resolvedTargetWeight,
             actualWeight: form.actualWeight === "" ? null : Number(form.actualWeight)
-          })
-        }
+          });
+        }}
       >
         저장
       </button>
@@ -385,6 +418,18 @@ function WeightManager({
       </div>
     </>
   );
+}
+
+function getAutoTargetWeight(weights: DashboardSnapshot["weights"], selectedDate: string) {
+  const previousActual = [...weights]
+    .filter((item) => item.date < selectedDate && item.actualWeight !== null)
+    .sort((a, b) => b.date.localeCompare(a.date))[0]?.actualWeight;
+
+  if (previousActual === null || previousActual === undefined) {
+    return null;
+  }
+
+  return Number((previousActual - 0.2).toFixed(1));
 }
 
 function RunningManager({
