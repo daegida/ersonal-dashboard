@@ -63,23 +63,17 @@ async function getAccessToken() {
   return json.access_token as string;
 }
 
-export async function getTodayCalendar(): Promise<CalendarResponse> {
-  const { date, start, end } = toKstDateParts();
-  const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
-  const token = await getAccessToken().catch(() => null);
+async function resolveCalendarIds(token: string) {
+  const configured = process.env.GOOGLE_CALENDAR_ID
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
 
-  if (!token) {
-    return readCacheOrDemo(date, "Google Calendar 인증값이 없어 예시 일정 또는 저장된 일정을 표시 중입니다.");
+  if (configured && configured.length > 0 && !configured.includes("all")) {
+    return configured;
   }
 
-  const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
-  url.searchParams.set("timeMin", start);
-  url.searchParams.set("timeMax", end);
-  url.searchParams.set("singleEvents", "true");
-  url.searchParams.set("orderBy", "startTime");
-  url.searchParams.set("maxResults", "10");
-
-  const response = await fetch(url, {
+  const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
     headers: {
       authorization: `Bearer ${token}`
     },
@@ -87,34 +81,98 @@ export async function getTodayCalendar(): Promise<CalendarResponse> {
   });
 
   if (!response.ok) {
-    const message = await response.text();
-    if (response.status === 403) {
-      return readCacheOrDemo(date, "현재 Google 토큰에 일정 읽기 권한이 없어 저장된 오늘 일정으로 표시 중입니다.");
-    }
-    throw new Error(`Google Calendar error: ${response.status} ${message}`);
+    throw new Error(`Google Calendar list error: ${response.status} ${await response.text()}`);
   }
 
   const json = await response.json();
-  const events = (json.items ?? []).map((item: Record<string, unknown>) => {
-    const startValue = (item.start as { dateTime?: string; date?: string })?.dateTime ?? (item.start as { date?: string })?.date ?? "";
-    const endValue = (item.end as { dateTime?: string; date?: string })?.dateTime ?? (item.end as { date?: string })?.date ?? "";
-    const isAllDay = !String(startValue).includes("T");
+  const items = Array.isArray(json.items) ? json.items : [];
+
+  return items
+    .filter((item: Record<string, unknown>) => item.hidden !== true && item.selected !== false)
+    .map((item: Record<string, unknown>) => String(item.id ?? ""))
+    .filter(Boolean);
+}
+
+export async function getTodayCalendar(): Promise<CalendarResponse> {
+  const { date, start, end } = toKstDateParts();
+  const token = await getAccessToken().catch(() => null);
+
+  if (!token) {
+    return readCacheOrDemo(date, "Google Calendar 인증값이 없어 예시 일정 또는 저장된 일정을 표시 중입니다.");
+  }
+  let calendarIds: string[];
+
+  try {
+    calendarIds = await resolveCalendarIds(token);
+  } catch {
+    calendarIds = [process.env.GOOGLE_CALENDAR_ID || "primary"];
+  }
+
+  try {
+    const responses = await Promise.all(
+      calendarIds.map(async (calendarId) => {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
+        url.searchParams.set("timeMin", start);
+        url.searchParams.set("timeMax", end);
+        url.searchParams.set("singleEvents", "true");
+        url.searchParams.set("orderBy", "startTime");
+        url.searchParams.set("maxResults", "20");
+
+        const response = await fetch(url, {
+          headers: {
+            authorization: `Bearer ${token}`
+          },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          const message = await response.text();
+          if (response.status === 403) {
+            throw new Error(`403:${message}`);
+          }
+          throw new Error(`Google Calendar error: ${response.status} ${message}`);
+        }
+
+        const json = await response.json();
+        return (json.items ?? []).map((item: Record<string, unknown>) => {
+          const startValue =
+            (item.start as { dateTime?: string; date?: string })?.dateTime ??
+            (item.start as { date?: string })?.date ??
+            "";
+          const endValue =
+            (item.end as { dateTime?: string; date?: string })?.dateTime ??
+            (item.end as { date?: string })?.date ??
+            "";
+          const isAllDay = !String(startValue).includes("T");
+
+          return {
+            id: `${calendarId}:${String(item.id ?? "")}`,
+            title: String(item.summary ?? "제목 없음"),
+            start: String(startValue),
+            end: String(endValue),
+            isAllDay
+          };
+        });
+      })
+    );
+
+    const events = responses
+      .flat()
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+      .slice(0, 20);
 
     return {
-      id: String(item.id ?? ""),
-      title: String(item.summary ?? "제목 없음"),
-      start: String(startValue),
-      end: String(endValue),
-      isAllDay
+      source: "google-calendar",
+      generatedAt: new Date().toISOString(),
+      date,
+      events
     };
-  });
-
-  return {
-    source: "google-calendar",
-    generatedAt: new Date().toISOString(),
-    date,
-    events
-  };
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("403:")) {
+      return readCacheOrDemo(date, "현재 Google 토큰에 일정 읽기 권한이 없어 저장된 오늘 일정으로 표시 중입니다.");
+    }
+    throw error;
+  }
 }
 
 function readCacheOrDemo(date: string, note: string): CalendarResponse {
