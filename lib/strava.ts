@@ -51,7 +51,12 @@ async function supabaseRequest<T>(pathWithQuery: string, init?: RequestInit): Pr
     return undefined as T;
   }
 
-  return (await response.json()) as T;
+  const text = await response.text();
+  if (!text) {
+    return undefined as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 function ensureStorageDir() {
