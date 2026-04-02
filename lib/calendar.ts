@@ -69,7 +69,7 @@ async function resolveCalendarIds(token: string) {
     .map((value) => value.trim())
     .filter(Boolean);
 
-  if (configured && configured.length > 0 && !configured.includes("all")) {
+  if (configured && configured.length > 0 && !configured.includes("all") && !configured.includes("primary")) {
     return configured;
   }
 
