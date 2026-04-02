@@ -59,14 +59,7 @@ export function Dashboard({ initialData }: Props) {
   const weeklyRunChart = useMemo(() => buildWeeklyRunChart(stravaRuns), [stravaRuns]);
   const weekRunDistance = weeklyRunChart.reduce((sum, item) => sum + item.거리, 0).toFixed(1);
   const activeRunDays = weeklyRunChart.filter((item) => item.거리 > 0).length;
-  const upcomingEvents = useMemo(() => {
-    const now = new Date();
-    const events = (calendar?.events ?? []).filter((event) => {
-      if (event.isAllDay) return true;
-      return new Date(event.end) >= now;
-    });
-    return events.slice(0, 4);
-  }, [calendar]);
+  const todayEvents = useMemo(() => calendar?.events ?? [], [calendar]);
   const weightTrend = useMemo(
     () =>
       [...weights]
@@ -208,16 +201,16 @@ export function Dashboard({ initialData }: Props) {
           <div>
             <div className="scheduleTitle">오늘 주요 일정</div>
           </div>
-          <div className="scheduleCountBadge">{upcomingEvents.length}개</div>
+          <div className="scheduleCountBadge">{todayEvents.length}개</div>
         </div>
         <div className="scheduleList">
-          {upcomingEvents.map((event) => (
+          {todayEvents.map((event) => (
             <div className="scheduleItem" key={event.id}>
               <span className="scheduleTime">{event.isAllDay ? "하루 종일" : formatCalendarTime(event.start)}</span>
               <strong>{event.title}</strong>
             </div>
           ))}
-          {calendar && upcomingEvents.length === 0 ? <div className="scheduleEmpty">남은 일정이 없습니다.</div> : null}
+          {calendar && todayEvents.length === 0 ? <div className="scheduleEmpty">오늘 일정이 없습니다.</div> : null}
         </div>
         {calendar?.note ? <div className="scheduleNote">{calendar.note}</div> : null}
       </section>
