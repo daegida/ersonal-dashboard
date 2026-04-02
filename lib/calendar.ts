@@ -63,16 +63,12 @@ async function getAccessToken() {
   return json.access_token as string;
 }
 
-async function resolveCalendarIds(token: string) {
-  const configured = process.env.GOOGLE_CALENDAR_ID
-    ?.split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
+type CalendarSource = {
+  id: string;
+  name: string;
+};
 
-  if (configured && configured.length > 0 && !configured.includes("all") && !configured.includes("primary")) {
-    return configured;
-  }
-
+async function fetchSelectedCalendarSources(token: string): Promise<CalendarSource[]> {
   const response = await fetch("https://www.googleapis.com/calendar/v3/users/me/calendarList", {
     headers: {
       authorization: `Bearer ${token}`
@@ -89,8 +85,24 @@ async function resolveCalendarIds(token: string) {
 
   return items
     .filter((item: Record<string, unknown>) => item.hidden !== true && item.selected !== false)
-    .map((item: Record<string, unknown>) => String(item.id ?? ""))
+    .map((item: Record<string, unknown>) => ({
+      id: String(item.id ?? ""),
+      name: String(item.summaryOverride ?? item.summary ?? item.id ?? "")
+    }))
+    .filter((item: CalendarSource) => item.id);
+}
+
+async function resolveCalendarSources(token: string): Promise<CalendarSource[]> {
+  const configured = process.env.GOOGLE_CALENDAR_ID
+    ?.split(",")
+    .map((value) => value.trim())
     .filter(Boolean);
+
+  if (configured && configured.length > 0 && !configured.includes("all") && !configured.includes("primary")) {
+    return configured.map((id) => ({ id, name: id }));
+  }
+
+  return fetchSelectedCalendarSources(token);
 }
 
 export async function getTodayCalendar(): Promise<CalendarResponse> {
@@ -100,18 +112,19 @@ export async function getTodayCalendar(): Promise<CalendarResponse> {
   if (!token) {
     return readCacheOrDemo(date, "Google Calendar 인증값이 없어 예시 일정 또는 저장된 일정을 표시 중입니다.");
   }
-  let calendarIds: string[];
+  let calendarSources: CalendarSource[];
 
   try {
-    calendarIds = await resolveCalendarIds(token);
+    calendarSources = await resolveCalendarSources(token);
   } catch {
-    calendarIds = [process.env.GOOGLE_CALENDAR_ID || "primary"];
+    const fallbackId = process.env.GOOGLE_CALENDAR_ID || "primary";
+    calendarSources = [{ id: fallbackId, name: fallbackId }];
   }
 
   try {
     const responses = await Promise.all(
-      calendarIds.map(async (calendarId) => {
-        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`);
+      calendarSources.map(async (calendarSource) => {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarSource.id)}/events`);
         url.searchParams.set("timeMin", start);
         url.searchParams.set("timeMax", end);
         url.searchParams.set("singleEvents", "true");
@@ -145,12 +158,22 @@ export async function getTodayCalendar(): Promise<CalendarResponse> {
             "";
           const isAllDay = !String(startValue).includes("T");
 
+          const description = String(item.description ?? "");
+          const lowerName = calendarSource.name.toLowerCase();
+          const isTask =
+            lowerName.includes("task") ||
+            lowerName.includes("할 일") ||
+            description.includes("tasks.google.com/task/");
+
           return {
-            id: `${calendarId}:${String(item.id ?? "")}`,
+            id: `${calendarSource.id}:${String(item.id ?? "")}`,
             title: String(item.summary ?? "제목 없음"),
             start: String(startValue),
             end: String(endValue),
-            isAllDay
+            isAllDay,
+            calendarId: calendarSource.id,
+            calendarName: calendarSource.name,
+            isTask
           };
         });
       })

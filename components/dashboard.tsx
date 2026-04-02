@@ -64,6 +64,7 @@ export function Dashboard({ initialData }: Props) {
 
     return (calendar?.events ?? []).filter((event) => {
       if (event.isAllDay) return true;
+      if (event.isTask) return true;
       return new Date(event.end) >= now;
     });
   }, [calendar]);
@@ -212,8 +213,9 @@ export function Dashboard({ initialData }: Props) {
         </div>
         <div className="scheduleList">
           {remainingTodayEvents.map((event) => (
-            <div className="scheduleItem" key={event.id}>
+            <div className={`scheduleItem${event.isTask ? " taskItem" : ""}`} key={event.id}>
               <span className="scheduleTime">{event.isAllDay ? "하루 종일" : formatCalendarTime(event.start)}</span>
+              {event.isTask ? <span className="scheduleKindBadge">TASK</span> : null}
               <strong>{event.title}</strong>
             </div>
           ))}

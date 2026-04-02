@@ -99,6 +99,9 @@ export type CalendarEvent = {
   start: string;
   end: string;
   isAllDay: boolean;
+  calendarId?: string;
+  calendarName?: string;
+  isTask?: boolean;
 };
 
 export type CalendarResponse = {

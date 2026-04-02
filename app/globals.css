@@ -318,10 +318,32 @@ input {
   gap: 4px;
 }
 
+.scheduleItem.taskItem {
+  background: linear-gradient(135deg, rgba(255, 244, 214, 0.98), rgba(255, 237, 187, 0.96));
+  border-color: rgba(238, 164, 67, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
 .scheduleTime {
   color: var(--brand);
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.scheduleKindBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(238, 164, 67, 0.22);
+  color: #8a5600;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .scheduleNote {
