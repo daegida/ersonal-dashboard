@@ -215,8 +215,6 @@ export async function getTodayCalendar(): Promise<CalendarResponse> {
             url.searchParams.set("showCompleted", "false");
             url.searchParams.set("showDeleted", "false");
             url.searchParams.set("showHidden", "false");
-            url.searchParams.set("dueMin", start);
-            url.searchParams.set("dueMax", end);
             url.searchParams.set("maxResults", "50");
 
             const response = await fetch(url, {
