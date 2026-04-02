@@ -28,7 +28,7 @@ export function Dashboard({ initialData }: Props) {
   const [stravaStatus, setStravaStatus] = useState<StravaStatusResponse | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getKstDateString();
 
   useEffect(() => {
     void Promise.all([
@@ -430,6 +430,15 @@ function getAutoTargetWeight(weights: DashboardSnapshot["weights"], selectedDate
   }
 
   return Number((previousActual - 0.2).toFixed(1));
+}
+
+function getKstDateString() {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date());
 }
 
 function RunningManager({
