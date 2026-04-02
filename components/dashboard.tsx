@@ -32,9 +32,9 @@ export function Dashboard({ initialData }: Props) {
 
   useEffect(() => {
     void Promise.all([
-      fetch("/api/weather").then((res) => res.json()),
-      fetch("/api/calendar").then((res) => res.json()),
-      fetch("/api/strava/status").then((res) => res.json())
+      fetch("/api/weather", { cache: "no-store" }).then((res) => res.json()),
+      fetch("/api/calendar", { cache: "no-store" }).then((res) => res.json()),
+      fetch("/api/strava/status", { cache: "no-store" }).then((res) => res.json())
     ]).then(([weatherData, calendarData, stravaData]) => {
       setWeather(weatherData);
       setCalendar(calendarData);
@@ -43,13 +43,13 @@ export function Dashboard({ initialData }: Props) {
   }, []);
 
   async function refreshWeights() {
-    const res = await fetch("/api/weights");
+    const res = await fetch("/api/weights", { cache: "no-store" });
     const json = await res.json();
     setWeights(json.weights);
   }
 
   async function refreshRuns() {
-    const res = await fetch("/api/runs");
+    const res = await fetch("/api/runs", { cache: "no-store" });
     const json = await res.json();
     setRuns(json.runs);
   }
@@ -264,7 +264,7 @@ export function Dashboard({ initialData }: Props) {
                   setNotice(json.message ?? (json.ok ? "Strava 가져오기가 완료되었습니다." : "Strava 가져오기에 실패했습니다."));
                   if (json.ok) {
                     setRuns(json.runs);
-                    const statusRes = await fetch("/api/strava/status");
+                    const statusRes = await fetch("/api/strava/status", { cache: "no-store" });
                     setStravaStatus(await statusRes.json());
                   }
                 })
